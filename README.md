@@ -1,4 +1,4 @@
-# Crosy
+# Crosy — Crosshair Overlay for macOS
 
 A small macOS app that puts a crosshair in the center of your screen. Pick a shape, adjust it to your liking, and get back to your game. The overlay stays above your apps and lets mouse clicks pass through.
 
