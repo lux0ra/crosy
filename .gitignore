@@ -1,5 +1,6 @@
 # Swift build output and local package state
 .build/
+dist/
 .swiftpm/
 
 # macOS and Xcode user files

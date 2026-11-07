@@ -7,6 +7,7 @@ enum CrosshairOverlayApp {
         do {
             let arguments = Array(CommandLine.arguments.dropFirst()).filter { !$0.hasPrefix("-psn_") }
             let usesSettings = arguments.isEmpty
+            if usesSettings { PreferencesMigration.migrate() }
             let options = try Options.parse(arguments)
             if options.help { print(Options.usage); return }
             let app = NSApplication.shared
@@ -26,7 +27,7 @@ enum CrosshairOverlayApp {
             app.delegate = controller
             withExtendedLifetime(controller) { app.run() }
         } catch {
-            FileHandle.standardError.write(Data("Ошибка: \(error)\nСправка: CrosshairOverlay --help\n".utf8))
+            FileHandle.standardError.write(Data("Ошибка: \(error)\nСправка: Crosy --help\n".utf8))
             exit(2)
         }
     }

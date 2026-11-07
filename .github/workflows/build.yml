@@ -1,4 +1,4 @@
-name: Build
+name: Build Crosy
 
 on:
   push:
@@ -13,10 +13,13 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
-      - name: Build binary and app bundle
+      - name: Test settings migration and CLI
+        run: swift test
+      - name: Build universal app and verify ZIP
         run: ./build.sh
-      - name: Check CLI help and bundle
-        run: |
-          .build/release/CrosshairOverlay --help
-          plutil -lint .build/release/CrosshairOverlay.app/Contents/Info.plist
-          codesign --verify --strict .build/release/CrosshairOverlay.app
+      - name: Upload distribution ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: Crosy-macOS-universal
+          path: dist/Crosy-macOS-universal.zip
+          if-no-files-found: error

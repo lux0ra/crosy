@@ -98,7 +98,7 @@ final class OverlayController: NSObject, NSApplicationDelegate {
     private func refreshMenu() {
         visibilityMenuItem?.title = L.text(isEnabled ? "Скрыть прицел" : "Показать прицел")
         visibilityMenuItem?.state = isEnabled ? .on : .off
-        statusItem?.button?.toolTip = L.text(isEnabled ? "CrosshairOverlay — прицел включён" : "CrosshairOverlay — прицел выключен")
+        statusItem?.button?.toolTip = L.text(isEnabled ? "Crosy — прицел включён" : "Crosy — прицел выключен")
     }
 
     func refreshLanguage() {
@@ -131,7 +131,7 @@ final class OverlayController: NSObject, NSApplicationDelegate {
         if usesSettings {
             settings = SettingsController(overlay: self)
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
-            item.button?.image = NSImage(systemSymbolName: "scope", accessibilityDescription: "CrosshairOverlay")
+            item.button?.image = NSImage(systemSymbolName: "scope", accessibilityDescription: "Crosy")
             let menu = NSMenu()
             for (title, action, key) in [
                 ("Настройки прицела…", #selector(showSettings), ","),

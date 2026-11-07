@@ -24,9 +24,9 @@ struct Options: Codable {
     var listScreens = false
 
     static let usage = """
-    CrosshairOverlay — прозрачный прицел для macOS
+    Crosy — прозрачный прицел для macOS
 
-    Запуск: CrosshairOverlay [параметры]
+    Запуск: Crosy [параметры]
       --style cross|dot|circle   Форма (cross)
       --color RRGGBB            Цвет (00FF00); '#' тоже допустим
       --length N                Длина каждого луча креста (10)

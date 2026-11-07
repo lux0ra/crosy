@@ -2,7 +2,10 @@
 import PackageDescription
 
 let package = Package(
-    name: "CrosshairOverlay",
+    name: "Crosy",
     platforms: [.macOS(.v13)],
-    targets: [.executableTarget(name: "CrosshairOverlay")]
+    targets: [
+        .executableTarget(name: "Crosy", path: "Sources/CrosshairOverlay"),
+        .testTarget(name: "CrosyTests", dependencies: ["Crosy"])
+    ]
 )
