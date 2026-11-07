@@ -5,7 +5,7 @@ A small macOS app that puts a crosshair in the center of your screen. Pick a sha
 > **holy-vibecoded** (made with AI)
 
 <p align="center">
-  <img src="docs/images/crosy-preview.png" alt="Crosy settings window with a live crosshair preview, appearance controls, and display settings" width="584">
+  <img src="docs/images/crosy-preview.png" alt="Crosy settings window with a live crosshair preview, appearance controls, and display settings" width="696">
 </p>
 
 ### Features
