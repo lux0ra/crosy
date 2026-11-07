@@ -1,0 +1,14 @@
+# Swift build output and local package state
+.build/
+.swiftpm/
+
+# macOS and Xcode user files
+.DS_Store
+xcuserdata/
+*.xcuserstate
+
+# Local logs and environment overrides
+*.log
+.env
+.env.*
+!.env.example

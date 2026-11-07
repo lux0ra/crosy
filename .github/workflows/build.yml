@@ -1,0 +1,22 @@
+name: Build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build binary and app bundle
+        run: ./build.sh
+      - name: Check CLI help and bundle
+        run: |
+          .build/release/CrosshairOverlay --help
+          plutil -lint .build/release/CrosshairOverlay.app/Contents/Info.plist
+          codesign --verify --strict .build/release/CrosshairOverlay.app
