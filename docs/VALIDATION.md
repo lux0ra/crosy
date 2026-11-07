@@ -2,7 +2,7 @@
 
 Validated on 2026-11-07 on an Apple Silicon Mac running macOS 27.2, with two displays.
 
-- Built both arm64 and x86_64 slices with Swift 6.3.3 and the installed macOS 15.4 SDK, targeting macOS 13.0. `lipo`, `file`, and `otool` confirm both architectures and minimum OS 13.0 in each slice.
+- Built both arm64 and x86_64 slices with Swift 6.3.3 and the installed macOS 26.5 SDK, targeting macOS 13.0. `lipo`, `file`, and `otool` confirm both architectures and minimum OS 13.0 in each slice. The current linker records SDK 27.0 in both slices, so the modern AppKit appearance is enabled.
 - The x86_64 CLI also ran successfully through Rosetta (`arch -x86_64 .build/release/Crosy --help`); physical Intel hardware remains untested.
 - `plutil` and bundle metadata checks passed: Crosy, executable Crosy, bundle ID `lol.luxora.crosy`, minimum macOS 13.0, AppIcon.
 - Ad-hoc signature passed `codesign --verify --strict --all-architectures`, including after ZIP extraction. No third-party embedded code or frameworks need separate signing.
@@ -16,14 +16,17 @@ Validated on 2026-11-07 on an Apple Silicon Mac running macOS 27.2, with two dis
 
 ## Local toolchain limitations
 
-The default macOS 27.0 SDK was built with Swift 6.4, whereas the installed compiler is Swift 6.3.3. The successful local commands were:
+The default `xcrun` macOS 27.0 SDK was built with Swift 6.4, whereas the installed compiler is Swift 6.3.3. An earlier release used SDK 15.4 as a workaround, which unintentionally selected legacy AppKit control styling on modern macOS. That workaround has been removed.
+
+The build now prefers the selected Command Line Tools SDK (macOS 26.5 on this Mac), matching the original build script. It rejects SDKs older than macOS 26, and archive verification checks the SDK recorded in both Mach-O slices. CI uses `macos-26`. The minimum runtime remains macOS 13.0 for both architectures.
 
 ```sh
-SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk ./scripts/build-icon.sh
-SDKROOT=/Library/Developer/CommandLineTools/SDKs/MacOSX15.4.sdk ./build.sh
+./build.sh
 ```
 
-No system toolchain files were changed. CI uses its runner's matching toolchain and SDK and runs `swift test` normally; the remote workflow has not been executed as part of this change.
+The corrected app was installed into `/Applications/Crosy.app` and launched successfully, retaining the existing preferences. Signature verification passed for the installed copy. A native settings-window rendering was inspected; direct system window capture was unavailable in this environment. A build explicitly selecting SDK 15.4 was rejected before compilation, as intended.
+
+No system toolchain files were changed. AppKit UI source and layout remain unchanged from the original app. [Apple documents the SDK-dependent adoption of the new native appearance](https://developer.apple.com/videos/play/wwdc2025/310/).
 
 ## Signing and remaining manual checks
 
@@ -33,4 +36,4 @@ No code-signing identities were available. This artifact is ad-hoc signed and is
 
 Still requires manual validation: physical Intel hardware, macOS 13 and other older supported releases, a browser-downloaded quarantined archive on a Mac with Gatekeeper enabled, visual appearance inside Finder/Launchpad, and physical display hot-plugging. Display reconfiguration was checked by notification and available-screen placement, not by unplugging the user's monitors.
 
-No GitHub Release was published and the GitHub repository was not renamed.
+The GitHub repository was not renamed by this work. Crosy 26.0.0 was subsequently published at the user’s request, replacing the old release.

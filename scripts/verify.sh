@@ -11,6 +11,11 @@ plist="$app/Contents/Info.plist"
 test -x "$exe"
 file "$exe"
 lipo "$exe" -verify_arch arm64 x86_64
+# Older linked SDKs make AppKit use the legacy control appearance on modern macOS.
+otool -arch all -l "$exe" | awk '
+  $1 == "sdk" { split($2, version, "."); if (version[1] < 26) exit 1; count++ }
+  END { if (count != 2) exit 1 }'
+
 plutil -lint "$plist"
 for key in CFBundleName CFBundleDisplayName CFBundleExecutable; do
   test "$(/usr/libexec/PlistBuddy -c "Print :$key" "$plist")" = Crosy

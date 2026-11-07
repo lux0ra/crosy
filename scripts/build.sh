@@ -1,7 +1,22 @@
 #!/bin/sh
 set -eu
 cd "$(dirname "$0")/.."
-sdk_path="${SDKROOT:-$(xcrun --show-sdk-path)}"
+sdk_path="${SDKROOT:-}"
+if [ -z "$sdk_path" ]; then
+  tools_sdk="$(xcode-select -p)/SDKs/MacOSX.sdk"
+  if [ -d "$tools_sdk" ]; then
+    sdk_path="$tools_sdk"
+  else
+    sdk_path="$(xcrun --show-sdk-path)"
+  fi
+fi
+# AppKit chooses its native control appearance from the SDK linked at build time.
+sdk_version="$(/usr/libexec/PlistBuddy -c 'Print :Version' "$sdk_path/SDKSettings.plist")"
+if [ "${sdk_version%%.*}" -lt 26 ]; then
+  echo "Use a matching Swift toolchain and macOS 26+ SDK to preserve Crosy's native appearance (selected: $sdk_version)." >&2
+  exit 1
+fi
+echo "Building Crosy with macOS SDK $sdk_version"
 identity="${CODESIGN_IDENTITY:--}"
 if [ -n "${NOTARY_PROFILE:-}" ] && [ "$identity" = - ]; then
   echo 'NOTARY_PROFILE requires a Developer ID Application CODESIGN_IDENTITY.' >&2

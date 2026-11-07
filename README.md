@@ -19,7 +19,7 @@ A small macOS app that puts a crosshair in the center of your screen. Pick a sha
 
 ### Build & Run
 
-You'll need **macOS 13+** and **Swift 6+**, available with a compatible Xcode or Command Line Tools installation. There are no third-party dependencies.
+To run Crosy, you'll need **macOS 13+**. To build it, use **Xcode 26+** or matching Command Line Tools with a **macOS 26+ SDK** and **Swift 6+**. There are no third-party dependencies.
 
 If you don't have Command Line Tools yet:
 
@@ -131,7 +131,9 @@ NOTARY_PROFILE='crosy-notary' ./build.sh
 
 This enables hardened runtime and secure timestamping, submits the ZIP with `notarytool --wait`, staples the ticket to the app, and repacks and verifies the final ZIP. Credentials are not stored in the repository. Notarization requires network access and Xcode's `notarytool`/`stapler`. See [Apple's notarization documentation](https://developer.apple.com/documentation/security/notarizing-macos-software-before-distribution).
 
-To use a different SDK:
+Build with a macOS 26+ SDK to retain the current native AppKit appearance on modern macOS. The deployment target remains macOS 13; Intel support does not change the interface. The build and archive checks reject older SDKs.
+
+To use a different compatible SDK:
 
 ```sh
 SDKROOT=/path/to/MacOSX.sdk ./build.sh
