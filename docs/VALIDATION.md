@@ -1,5 +1,7 @@
 # Crosy validation
 
+The results below describe the pre-migration AppKit build. For the current SwiftUI editor and its validation, see [SwiftUI migration](SWIFTUI-MIGRATION.md).
+
 Validated on 2026-11-07 on an Apple Silicon Mac running macOS 27.2, with two displays.
 
 - Built both arm64 and x86_64 slices with Swift 6.3.3 and the installed macOS 26.5 SDK, targeting macOS 13.0. `lipo`, `file`, and `otool` confirm both architectures and minimum OS 13.0 in each slice. The current linker records SDK 27.0 in both slices, so the modern AppKit appearance is enabled.

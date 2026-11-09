@@ -5,7 +5,7 @@ struct CLIError: Error, CustomStringConvertible {
     init(_ message: String) { description = message }
 }
 
-struct Options: Codable {
+struct Options: Codable, Equatable {
     var style = "cross"
     var color = "00FF00"
     var outlineColor = "000000"

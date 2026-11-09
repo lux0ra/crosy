@@ -1,8 +1,9 @@
 import AppKit
+import Combine
 
 @MainActor
 final class CrosshairView: NSView {
-    let options: Options
+    var options: Options
 
     init(options: Options) {
         self.options = options
@@ -60,42 +61,41 @@ final class OverlayPanel: NSPanel {
 
 @MainActor
 final class OverlayController: NSObject, NSApplicationDelegate {
-    private(set) var options: Options
+    let model: SettingsModel
+    var options: Options { model.options }
+    var isEnabled: Bool { model.isEnabled }
+    private var subscriptions: Set<AnyCancellable> = []
     private var settings: SettingsController?
     private var statusItem: NSStatusItem?
     private var visibilityMenuItem: NSMenuItem?
     private let usesSettings: Bool
-    private(set) var isEnabled = true
     private var panels: [OverlayPanel] = []
     private var signalSources: [DispatchSourceSignal] = []
 
-    init(options: Options, usesSettings: Bool) {
+    init(options: Options, usesSettings: Bool, defaults: UserDefaults = .standard) {
         self.usesSettings = usesSettings
-        if usesSettings,
-           let data = UserDefaults.standard.data(forKey: "crosshair.settings"),
-           let saved = try? JSONDecoder().decode(Options.self, from: data) {
-            self.options = saved
-        } else {
-            self.options = options
-        }
+        model = SettingsModel(options: options, persists: usesSettings, defaults: defaults)
+        super.init()
+        // Published values arrive before storage changes; pass the emitted value to the overlay.
+        model.$options.dropFirst().sink { [weak self] value in
+            self?.rebuild(options: value)
+        }.store(in: &subscriptions)
+        model.$isEnabled.dropFirst().sink { [weak self] value in
+            guard let self else { return }
+            self.rebuild(enabled: value)
+            self.refreshMenu(enabled: value)
+        }.store(in: &subscriptions)
+        model.$language.dropFirst().sink { [weak self] _ in
+            self?.refreshLanguage()
+        }.store(in: &subscriptions)
     }
 
-    func update(_ options: Options) {
-        self.options = options
-        if usesSettings, let data = try? JSONEncoder().encode(options) {
-            UserDefaults.standard.set(data, forKey: "crosshair.settings")
-        }
-        rebuild()
-    }
+    func update(_ options: Options) { model.update(options) }
 
-    @objc func toggleEnabled() {
-        isEnabled.toggle()
-        rebuild()
-        settings?.refreshEnabled()
-        refreshMenu()
-    }
+    @objc func toggleEnabled() { model.setEnabled(!isEnabled) }
 
-    private func refreshMenu() {
+    private func refreshMenu(enabled: Bool? = nil) {
+        let isEnabled = enabled ?? model.isEnabled
         visibilityMenuItem?.title = L.text(isEnabled ? "Скрыть прицел" : "Показать прицел")
         visibilityMenuItem?.state = isEnabled ? .on : .off
         statusItem?.button?.toolTip = L.text(isEnabled ? "Crosy — прицел включён" : "Crosy — прицел выключен")
@@ -119,7 +119,7 @@ final class OverlayController: NSObject, NSApplicationDelegate {
 
 
     func applicationDidFinishLaunching(_ notification: Notification) {
-        NotificationCenter.default.addObserver(self, selector: #selector(rebuild),
+        NotificationCenter.default.addObserver(self, selector: #selector(displaysChanged),
             name: NSApplication.didChangeScreenParametersNotification, object: nil)
         for number in [SIGINT, SIGTERM] {
             signal(number, SIG_IGN)
@@ -129,7 +129,7 @@ final class OverlayController: NSObject, NSApplicationDelegate {
             signalSources.append(source)
         }
         if usesSettings {
-            settings = SettingsController(overlay: self)
+            settings = SettingsController(model: model)
             let item = NSStatusBar.system.statusItem(withLength: NSStatusItem.squareLength)
             item.button?.image = NSImage(systemSymbolName: "scope", accessibilityDescription: "Crosy")
             let menu = NSMenu()
@@ -154,7 +154,11 @@ final class OverlayController: NSObject, NSApplicationDelegate {
         print("Прицел запущен (PID \(ProcessInfo.processInfo.processIdentifier)). Остановка: Ctrl+C.")
     }
 
-    @objc private func rebuild() {
+    @objc private func displaysChanged() { rebuild() }
+
+    private func rebuild(options: Options? = nil, enabled: Bool? = nil) {
+        let options = options ?? model.options
+        let isEnabled = enabled ?? model.isEnabled
         for panel in panels { panel.orderOut(nil); panel.close() }
         panels.removeAll()
         guard isEnabled else { return }

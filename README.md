@@ -5,7 +5,7 @@ A small macOS app that puts a crosshair in the center of your screen. Pick a sha
 > **holy-vibecoded** (made with AI)
 
 <p align="center">
-  <img src="docs/images/crosy-settings-dark.png" alt="Crosy settings window with a live crosshair preview, appearance controls, and display settings" width="696">
+  <img src="docs/images/crosy-settings-dark.png" alt="Crosy SwiftUI editor with a live crosshair preview, appearance controls, and display settings" width="680">
 </p>
 
 ### Features
@@ -60,7 +60,9 @@ On the first launch without CLI arguments, Crosy copies crosshair settings and l
 
 Open the app, choose a shape, and adjust the sliders or type exact values into the fields. Changes take effect immediately and save automatically. Settings that don't apply to the current shape are dimmed.
 
-Use **RU / EN** at the bottom of the left column to change the interface language. This translates the settings, tooltips, menu bar controls, and reset dialog. Resetting your crosshair settings keeps your language choice.
+Use **RU / EN** in the left column to change the interface language. This translates the settings, tooltips, menu bar controls, and reset dialog. Resetting your crosshair settings keeps your language choice.
+
+The settings editor uses native SwiftUI controls, follows Light/Dark Mode, and shows a scaled preview when the crosshair exceeds the available space. The visibility button uses the standard bordered style. The minimum supported OS remains macOS 13.
 
 Closing the settings window leaves the crosshair running. Click the crosshair icon in the menu bar to bring settings back, hide the overlay, or quit the app. **⌘⇧H** also toggles the crosshair while the app is active.
 
@@ -85,7 +87,9 @@ See [CLI documentation](docs/CLI.md) for more examples, or run:
 ### Technology Stack
 
 - **Swift 6**
-- **AppKit** + **Core Graphics**
+- **SwiftUI** settings hosted in AppKit
+- **AppKit** overlay, menu bar, and window lifecycle
+- **Core Graphics** crosshair rendering
 - **Swift Package Manager**
 
 <details>
@@ -96,7 +100,9 @@ Sources/CrosshairOverlay/
   App.swift              Entry point and launch mode
   Options.swift          Configuration and CLI parsing
   Overlay.swift          Crosshair rendering and lifecycle
-  Settings.swift         Native settings interface
+  Settings.swift         SwiftUI settings and hosting window
+  SettingsModel.swift    Shared observable state and persistence
+  CrosshairPreview.swift  SwiftUI preview using the overlay renderer
   Localization.swift     Russian and English UI strings
   PreferencesMigration.swift  One-time legacy preference migration
 Resources/Info.plist     App bundle metadata
@@ -149,7 +155,7 @@ swift build -c release
 
 ### Notes
 
-See [validation results and remaining checks](docs/VALIDATION.md) for the tested environment and local toolchain limitations.
+See [SwiftUI migration details](docs/SWIFTUI-MIGRATION.md) and [validation results and remaining checks](docs/VALIDATION.md) for the tested environment and local toolchain limitations.
 
 No Accessibility or Screen Recording permissions are needed. Some games with exclusive fullscreen rendering may hide the overlay; try a borderless window if that happens.
 
